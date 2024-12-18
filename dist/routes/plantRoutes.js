@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const plantController_1 = require("../controllers/plantController");
 const router = express_1.default.Router();
-// Wrap the handler in an async arrow function to ensure proper typing and avoid overload errors
+//Wrap the handler in an async arrow function to ensure proper typing and avoid overload errors
 router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     yield (0, plantController_1.getAllPlants)(req, res);
 }));
