@@ -1,0 +1,39 @@
+### POST Request for a Plant
+## Expected result: A new plant is created in the database.
+POST http://localhost:3000/plants HTTP/1.1
+content-type: application/json
+
+{
+   "name": "Jack's grapes ",
+   "species": "Grape Vines",
+   "wateringFrequency": 3,
+   "lightRequirement": "Direct sunlight"
+}
+
+###
+### PUT Request for a plant
+PUT http://localhost:3000/plants/60c72b2f4f1a2b001c8e4d8a HTTP/1.1
+content-type: application/json
+
+{
+   "name": "Updated Plant Name",
+   "species": "Ficus benjamina",
+   "wateringFrequency": 7,
+   "lightRequirement": "Full sun"
+}
+
+###
+### DELETE Request for a Plant (Delete by ID)
+## Expected result: The plant with the given ID is deleted.
+DELETE http://localhost:3000/plants/60c72b2f4f1a2b001c8e4d8a HTTP/1.1
+content-type: application/json
+
+###
+### GET Request for All Plants
+## Expected result: A list of all plants is retrieved.
+GET http://localhost:3000/plants HTTP/1.1
+
+###
+### GET Request for a Plant (Get by ID)
+## Expected result: Details of the plant with the given ID are retrieved.
+GET http://localhost:3000/plants/60c72b2f4f1a2b001c8e4d8a HTTP/1.1
