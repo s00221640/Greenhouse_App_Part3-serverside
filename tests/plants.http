@@ -4,7 +4,7 @@ POST http://localhost:3000/plants HTTP/1.1
 content-type: application/json
 
 {
-   "name": "Jack's grapes ",
+   "name": "Jack's new grapes ",
    "species": "Grape Vines",
    "wateringFrequency": 3,
    "lightRequirement": "Direct sunlight"
@@ -36,4 +36,5 @@ GET http://localhost:3000/plants HTTP/1.1
 ###
 ### GET Request for a Plant (Get by ID)
 ## Expected result: Details of the plant with the given ID are retrieved.
-GET http://localhost:3000/plants/60c72b2f4f1a2b001c8e4d8a HTTP/1.1
+GET http://localhost:3000/plants/674f0b0cd548891748a47fe1 HTTP/1.1
+

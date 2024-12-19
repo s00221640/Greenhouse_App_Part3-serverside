@@ -1,56 +1,107 @@
-import { Request, Response } from 'express';
 import Plant from '../models/plantModel';
+import { Request, Response } from 'express';
 
-// Get all plants
-export const getAllPlants = async (req: Request, res: Response): Promise<Response | void> => {
+export const getAllPlants = async (req: Request, res: Response) => {
   try {
-    const plants = await Plant.find();
-    return res.status(200).json(plants);
-  } catch (error: any) {
-    return res.status(500).json({ message: error.message });
+    console.log('Fetching all plants from database...');
+    const plants = await Plant.find({});
+    console.log('Fetched plants:', plants);
+    res.status(200).json(plants);
+  } catch (error) {
+    console.error('Error fetching all plants:', error);
+    res.status(500).json({ message: 'Error fetching plants' });
   }
 };
 
-// Get plant by ID
-export const getPlantById = async (req: Request, res: Response): Promise<Response | void> => {
+export const getPlantById = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  console.log(`Fetching plant by ID: ${id}`); // Debugging log
+
   try {
-    const plant = await Plant.findById(req.params.id);
-    if (!plant) return res.status(404).json({ message: 'Plant not found' });
-    return res.status(200).json(plant);
-  } catch (error: any) {
-    return res.status(500).json({ message: error.message });
+    // Validate ID format
+    if (!id) {
+      console.error('No ID provided in request.');
+      return res.status(400).json({ message: 'Plant ID is required' });
+    }
+
+    const plant = await Plant.findById(id);
+
+    if (!plant) {
+      console.warn(`No plant found with ID: ${id}`);
+      return res.status(404).json({ message: 'Plant not found' });
+    }
+
+    console.log(`Plant found: ${JSON.stringify(plant)}`);
+    res.status(200).json(plant);
+  } catch (error) {
+    console.error(`Error fetching plant with ID ${id}:`, error);
+    res.status(500).json({ message: 'Error fetching plant', error });
   }
 };
 
-// Create a new plant
-export const createPlant = async (req: Request, res: Response): Promise<Response | void> => {
+export const createPlant = async (req: Request, res: Response) => {
+  const { name, species, plantingDate, wateringFrequency, lightRequirement } = req.body;
+  console.log('Creating new plant with data:', req.body);
+
   try {
-    const newPlant = new Plant(req.body);
-    const savedPlant = await newPlant.save();
-    return res.status(201).json(savedPlant);
-  } catch (error: any) {
-    return res.status(400).json({ message: error.message });
+    const plant = new Plant({ name, species, plantingDate, wateringFrequency, lightRequirement });
+    const newPlant = await plant.save();
+    console.log('Created new plant:', newPlant);
+    res.status(201).json(newPlant);
+  } catch (error) {
+    console.error('Error creating plant:', error);
+    res.status(500).json({ message: 'Error creating plant' });
   }
 };
 
-// Update a plant by ID
-export const updatePlant = async (req: Request, res: Response): Promise<Response | void> => {
+export const updatePlant = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  console.log('Updating plant with ID:', id, 'and data:', req.body);
+
   try {
-    const updatedPlant = await Plant.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updatedPlant) return res.status(404).json({ message: 'Plant not found' });
-    return res.status(200).json(updatedPlant);
-  } catch (error: any) {
-    return res.status(400).json({ message: error.message });
+    // Validate ID
+    if (!id) {
+      console.error('No ID provided in request.');
+      return res.status(400).json({ message: 'Plant ID is required for updating' });
+    }
+
+    const updatedPlant = await Plant.findByIdAndUpdate(id, req.body, { new: true });
+
+    if (!updatedPlant) {
+      console.warn(`No plant found with ID: ${id}`);
+      return res.status(404).json({ message: 'Plant not found' });
+    }
+
+    console.log('Successfully updated plant:', updatedPlant);
+    res.status(200).json(updatedPlant);
+  } catch (error) {
+    console.error('Error updating plant:', error);
+    res.status(500).json({ message: 'Error updating plant' });
   }
 };
 
-// Delete a plant by ID
-export const deletePlant = async (req: Request, res: Response): Promise<Response | void> => {
+export const deletePlant = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  console.log('Deleting plant with ID:', id);
+
   try {
-    const deletedPlant = await Plant.findByIdAndDelete(req.params.id);
-    if (!deletedPlant) return res.status(404).json({ message: 'Plant not found' });
-    return res.status(200).json({ message: 'Plant deleted successfully' });
-  } catch (error: any) {
-    return res.status(500).json({ message: error.message });
+    // Validate ID
+    if (!id) {
+      console.error('No ID provided in request.');
+      return res.status(400).json({ message: 'Plant ID is required for deletion' });
+    }
+
+    const deletedPlant = await Plant.findByIdAndDelete(id);
+
+    if (!deletedPlant) {
+      console.warn(`No plant found with ID: ${id}`);
+      return res.status(404).json({ message: 'Plant not found' });
+    }
+
+    console.log('Successfully deleted plant:', deletedPlant);
+    res.status(200).json({ message: 'Plant deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting plant:', error);
+    res.status(500).json({ message: 'Error deleting plant' });
   }
 };

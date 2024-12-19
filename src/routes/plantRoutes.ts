@@ -9,25 +9,62 @@ import {
 
 const router: Router = express.Router();
 
-// Wrap the handler in an async arrow function to ensure proper typing and avoid overload errors
+// Fetch all plants
 router.get('/', async (req: Request, res: Response) => {
-  await getAllPlants(req, res);
+  console.log('GET / - Fetching all plants');
+  try {
+    await getAllPlants(req, res);
+  } catch (error) {
+    console.error('Error in GET /:', error);
+    res.status(500).json({ message: 'Error fetching all plants', error });
+  }
 });
 
+// Fetch a plant by ID
 router.get('/:id', async (req: Request, res: Response) => {
-  await getPlantById(req, res);
+  const { id } = req.params;
+  console.log(`GET /:id - Fetching plant by ID: ${id}`);
+  try {
+    await getPlantById(req, res);
+  } catch (error) {
+    console.error(`Error in GET /:id (${id}):`, error);
+    res.status(500).json({ message: 'Error fetching plant by ID', error });
+  }
 });
 
+// Create a new plant
 router.post('/', async (req: Request, res: Response) => {
-  await createPlant(req, res);
+  console.log('POST / - Creating a new plant', req.body);
+  try {
+    await createPlant(req, res);
+  } catch (error) {
+    console.error('Error in POST /:', error);
+    res.status(500).json({ message: 'Error creating plant', error });
+  }
 });
 
+// Update a plant by ID
 router.put('/:id', async (req: Request, res: Response) => {
-  await updatePlant(req, res);
+  const { id } = req.params;
+  console.log(`PUT /:id - Updating plant with ID: ${id}`, req.body);
+  try {
+    await updatePlant(req, res);
+  } catch (error) {
+    console.error(`Error in PUT /:id (${id}):`, error);
+    res.status(500).json({ message: 'Error updating plant', error });
+  }
 });
 
+// Delete a plant by ID
 router.delete('/:id', async (req: Request, res: Response) => {
-  await deletePlant(req, res);
+  const { id } = req.params;
+  console.log(`DELETE /:id - Deleting plant with ID: ${id}`);
+  try {
+    await deletePlant(req, res);
+  } catch (error) {
+    console.error(`Error in DELETE /:id (${id}):`, error);
+    res.status(500).json({ message: 'Error deleting plant', error });
+  }
 });
 
 export default router;
