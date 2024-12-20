@@ -10,7 +10,6 @@ import { authenticateKey } from '../auth.middleware';
 
 const router: Router = express.Router();
 
-// Apply middleware to all routes
 router.use(authenticateKey);
 
 // Fetch all plants
@@ -23,7 +22,7 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
-// Fetch a plant by ID
+//Fetch a plant by ID
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     await getPlantById(req, res);
@@ -33,7 +32,7 @@ router.get('/:id', async (req: Request, res: Response) => {
   }
 });
 
-// Create a new plant
+//Create a new plant
 router.post('/', async (req: Request, res: Response) => {
   try {
     await createPlant(req, res);

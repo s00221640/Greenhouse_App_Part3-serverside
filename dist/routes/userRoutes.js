@@ -7,8 +7,8 @@ const express_1 = __importDefault(require("express"));
 const userController_1 = require("../controllers/userController");
 const auth_middleware_1 = require("../auth.middleware");
 const router = express_1.default.Router();
-router.post('/register', userController_1.registerUser); // Route for registering users
-router.post('/login', userController_1.loginUser); // Route for logging in users
+router.post('/register', userController_1.registerUser); //Route for registering users
+router.post('/login', userController_1.loginUser); //Route for logging in users
 router.get('/validate', auth_middleware_1.authenticateKey, userController_1.validateToken); // Route to validate token
 exports.default = router;
 router.get('/test', (req, res) => {

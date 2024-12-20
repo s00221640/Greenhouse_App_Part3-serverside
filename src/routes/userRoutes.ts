@@ -4,9 +4,9 @@ import { authenticateKey } from '../auth.middleware';
 
 const router: Router = express.Router();
 
-router.post('/register', registerUser); // Route for registering users
-router.post('/login', loginUser); // Route for logging in users
-router.get('/validate', authenticateKey, validateToken); // Route to validate token
+router.post('/register', registerUser); //Route for registering users
+router.post('/login', loginUser); //Route for logging in users
+router.get('/validate', authenticateKey, validateToken); //validate token
 
 export default router;
 

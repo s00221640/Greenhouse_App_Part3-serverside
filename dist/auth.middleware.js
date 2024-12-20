@@ -16,7 +16,7 @@ const authenticateKey = (req, res, next) => {
     try {
         const decoded = jsonwebtoken_1.default.verify(token, SECRET_KEY);
         console.log('Authentication successful for user:', decoded);
-        req.user = decoded; // Attach user info to the request object
+        req.user = decoded; //Attach user info to the request object
         next();
     }
     catch (error) {

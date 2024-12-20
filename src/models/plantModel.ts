@@ -7,7 +7,7 @@ interface IPlant extends Document {
   wateringFrequency: number;
   lightRequirement: string;
   harvestDate?: Date;
-  userId: mongoose.Types.ObjectId; // Associate plant with a user
+  userId: mongoose.Types.ObjectId; //Tie plant to a user
 }
 
 const plantSchema = new Schema<IPlant>({
