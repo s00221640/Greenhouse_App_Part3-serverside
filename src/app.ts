@@ -1,18 +1,17 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import cors from 'cors'; // Import cors
+import cors from 'cors';
 import plantRoutes from './routes/plantRoutes';
+import userRoutes from './routes/userRoutes';
 
-dotenv.config(); // Load environment variables
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Enable CORS
+// Middleware should come BEFORE routes
 app.use(cors());
-
-// Middleware to parse JSON
 app.use(express.json());
 
 // Debug Incoming Requests
@@ -22,13 +21,19 @@ app.use((req, res, next) => {
   next();
 });
 
+// Routes come after middleware
+app.use('/users', userRoutes);
+app.use('/plants', plantRoutes);
+
 // Test CORS route
 app.get('/test-cors', (req, res) => {
   res.json({ message: 'CORS is working!' });
 });
 
-// Routes
-app.use('/plants', plantRoutes);
+// Welcome route
+app.get('/', (req, res) => {
+  res.send('Welcome to the Greenhouse App!');
+});
 
 // Database connection
 mongoose
@@ -36,11 +41,9 @@ mongoose
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => console.error('Error connecting to MongoDB:', err));
 
-app.get('/', (req, res) => {
-  res.send('Welcome to the Greenhouse App!');
-});
-
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+export default app;
