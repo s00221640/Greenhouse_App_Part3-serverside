@@ -6,16 +6,40 @@ import User, { IUser } from '../models/userModel';
 const SECRET_KEY = process.env.SECRET_KEY || 'your-secret-key';
 
 export const registerUser = async (req: Request, res: Response): Promise<void> => {
-  const { username, email, password } = req.body;
+  const { username, email, password } = req.body; // Include username
+
   try {
+    console.log('Incoming registration request:', { username, email, password });
+
+    if (!email || !password) {
+      console.error('Missing email or password in request body');
+      res.status(400).json({ message: 'Email and password are required.' });
+      return;
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      console.error(`Email already in use: ${email}`);
+      res.status(400).json({ message: 'Email is already in use.' });
+      return;
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ username, email, password: hashedPassword });
+    console.log('Password hashed successfully');
+
+    const user = new User({ username, email, password: hashedPassword }); // Include username
+    console.log('Saving user to database:', user);
+
     const savedUser = await user.save();
-    res.status(201).json(savedUser);
+    console.log('User saved successfully:', savedUser);
+
+    res.status(201).json({ message: 'User registered successfully.', user: savedUser });
   } catch (error) {
-    res.status(500).json({ message: 'Error registering user', error });
+    console.error('Error registering user:', error);
+    res.status(500).json({ message: 'Error registering user.', error });
   }
 };
+
 
 export const loginUser = async (req: Request, res: Response): Promise<void> => {
   const { email, password } = req.body;
