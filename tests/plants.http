@@ -43,8 +43,8 @@ POST http://localhost:3000/users/register
 Content-Type: application/json
 
 {
-  "username": "testuser",
-  "email": "test@example.com",
+  "username": "mytestuser",
+  "email": "jack@test.com",
   "password": "password123"
 }
 
@@ -54,7 +54,7 @@ POST http://localhost:3000/users/login
 Content-Type: application/json
 
 {
-  "email": "test@example.com",
+  "email": "jack@test.com",
   "password": "password123"
 }
 
@@ -69,3 +69,16 @@ Content-Type: application/json
 
 ###
 GET http://localhost:3000/users/test HTTP/1.1
+
+###
+POST http://localhost:3000/plants
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NjRmZGY5NjllODYzM2RkMjE3YTEyOSIsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsImlhdCI6MTczNDY5MDQzNCwiZXhwIjoxNzM0Njk0MDM0fQ.Zvy-Xgmc7wQbC0kUKOR3jCTUisndFeN4vYTsSS6TzM0
+Content-Type: application/json
+
+{
+  "name": "Basil",
+  "species": "Herb",
+  "plantingDate": "2024-12-20",
+  "wateringFrequency": 3,
+  "lightRequirement": "Full Sun"
+}

@@ -4,49 +4,50 @@ import { Request, Response } from 'express';
 
 export const getAllPlants = async (req: Request, res: Response) => {
   try {
-    console.log('Fetching all plants from database...');
-    const plants = await Plant.find({});
-    console.log('Fetched plants:', plants);
+    const userId = (req as any).user.id; // Get user ID from token
+    const plants = await Plant.find({ userId }); // Filter by userId
     res.status(200).json(plants);
   } catch (error) {
-    console.error('Error fetching all plants:', error);
+    console.error('Error fetching plants:', error);
     res.status(500).json({ message: 'Error fetching plants' });
   }
 };
 
 export const getPlantById = async (req: Request, res: Response) => {
   const { id } = req.params;
-  console.log(`Fetching plant by ID: ${id}`);
+  const userId = (req as any).user._id;
 
   try {
     if (!mongoose.isValidObjectId(id)) {
-      console.error('Invalid ObjectId format.');
       return res.status(400).json({ message: 'Invalid Plant ID format.' });
     }
 
-    const plant = await Plant.findById(id);
-
+    const plant = await Plant.findOne({ _id: id, userId }); // Ensure plant belongs to the user
     if (!plant) {
-      console.warn(`No plant found with ID: ${id}`);
       return res.status(404).json({ message: 'Plant not found.' });
     }
 
-    console.log(`Plant found: ${JSON.stringify(plant)}`);
     res.status(200).json(plant);
   } catch (error) {
-    console.error(`Error fetching plant with ID ${id}:`, error);
+    console.error('Error fetching plant by ID:', error);
     res.status(500).json({ message: 'Error fetching plant.' });
   }
 };
 
 export const createPlant = async (req: Request, res: Response) => {
+  const userId = (req as any).user._id;
   const { name, species, plantingDate, wateringFrequency, lightRequirement } = req.body;
-  console.log('Creating new plant with data:', req.body);
 
   try {
-    const plant = new Plant({ name, species, plantingDate, wateringFrequency, lightRequirement });
+    const plant = new Plant({
+      name,
+      species,
+      plantingDate,
+      wateringFrequency,
+      lightRequirement,
+      userId,
+    });
     const newPlant = await plant.save();
-    console.log('Created new plant:', newPlant);
     res.status(201).json(newPlant);
   } catch (error) {
     console.error('Error creating plant:', error);
@@ -56,22 +57,22 @@ export const createPlant = async (req: Request, res: Response) => {
 
 export const updatePlant = async (req: Request, res: Response) => {
   const { id } = req.params;
-  console.log('Updating plant with ID:', id, 'and data:', req.body);
+  const userId = (req as any).user._id;
 
   try {
     if (!mongoose.isValidObjectId(id)) {
-      console.error('Invalid ObjectId format.');
       return res.status(400).json({ message: 'Invalid Plant ID format.' });
     }
 
-    const updatedPlant = await Plant.findByIdAndUpdate(id, req.body, { new: true });
-
+    const updatedPlant = await Plant.findOneAndUpdate(
+      { _id: id, userId }, // Ensure only the user's plant can be updated
+      req.body,
+      { new: true }
+    );
     if (!updatedPlant) {
-      console.warn(`No plant found with ID: ${id}`);
       return res.status(404).json({ message: 'Plant not found.' });
     }
 
-    console.log('Successfully updated plant:', updatedPlant);
     res.status(200).json(updatedPlant);
   } catch (error) {
     console.error('Error updating plant:', error);
@@ -81,22 +82,18 @@ export const updatePlant = async (req: Request, res: Response) => {
 
 export const deletePlant = async (req: Request, res: Response) => {
   const { id } = req.params;
-  console.log('Deleting plant with ID:', id);
+  const userId = (req as any).user._id;
 
   try {
     if (!mongoose.isValidObjectId(id)) {
-      console.error('Invalid ObjectId format.');
       return res.status(400).json({ message: 'Invalid Plant ID format.' });
     }
 
-    const deletedPlant = await Plant.findByIdAndDelete(id);
-
+    const deletedPlant = await Plant.findOneAndDelete({ _id: id, userId }); // Ensure only the user's plant can be deleted
     if (!deletedPlant) {
-      console.warn(`No plant found with ID: ${id}`);
       return res.status(404).json({ message: 'Plant not found.' });
     }
 
-    console.log('Successfully deleted plant:', deletedPlant);
     res.status(200).json({ message: 'Plant deleted successfully.' });
   } catch (error) {
     console.error('Error deleting plant:', error);
