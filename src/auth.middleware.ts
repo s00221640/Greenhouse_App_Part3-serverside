@@ -13,9 +13,10 @@ export const authenticateKey = (req: Request, res: Response, next: NextFunction)
 
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
-    (req as any).user = decoded; // Attach user info to the request object
+    (req as any).user = decoded; // Attach user info (including `_id`) to the request object
     next();
   } catch (error) {
+    console.error('Invalid token:', error);
     res.status(403).json({ message: 'Invalid token. Unauthorized access.' });
   }
 };

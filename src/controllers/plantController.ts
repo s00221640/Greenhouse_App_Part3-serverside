@@ -4,7 +4,7 @@ import { Request, Response } from 'express';
 
 export const getAllPlants = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user.id; // Get user ID from token
+    const userId = (req as any).user._id; // Ensure we're using `_id` from the token
     const plants = await Plant.find({ userId }); // Filter by userId
     res.status(200).json(plants);
   } catch (error) {
