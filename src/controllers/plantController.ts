@@ -35,18 +35,22 @@ export const getPlantById = async (req: Request, res: Response) => {
 };
 
 export const createPlant = async (req: Request, res: Response) => {
-  const userId = (req as any).user._id;
+  const userId = (req as any).user._id; // Extract user ID from token
   const { name, species, plantingDate, wateringFrequency, lightRequirement } = req.body;
 
   try {
+    // Log the user ID for debugging
+    console.log('User ID for new plant:', userId);
+
     const plant = new Plant({
       name,
       species,
       plantingDate,
       wateringFrequency,
       lightRequirement,
-      userId,
+      userId, 
     });
+
     const newPlant = await plant.save();
     res.status(201).json(newPlant);
   } catch (error) {
@@ -54,6 +58,7 @@ export const createPlant = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Error creating plant' });
   }
 };
+
 
 export const updatePlant = async (req: Request, res: Response) => {
   const { id } = req.params;

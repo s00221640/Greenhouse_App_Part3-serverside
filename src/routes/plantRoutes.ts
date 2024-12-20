@@ -1,4 +1,4 @@
-import express, { Request, Response, Router, NextFunction } from 'express';
+import express, { Request, Response, Router } from 'express';
 import {
   getAllPlants,
   getPlantById,
