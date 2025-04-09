@@ -56,11 +56,15 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const token = jwt.sign({ id: user._id, email: user.email }, SECRET_KEY, {
+    // This is the critical change - using _id instead of id
+    const token = jwt.sign({ _id: user._id, email: user.email }, SECRET_KEY, {
       expiresIn: '1h',
     });
+    
+    console.log('Generated token with user ID:', user._id);
     res.status(200).json({ token });
   } catch (error) {
+    console.error('Error logging in:', error);
     res.status(500).json({ message: 'Error logging in', error });
   }
 };

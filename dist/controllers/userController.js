@@ -18,15 +18,31 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const userModel_1 = __importDefault(require("../models/userModel"));
 const SECRET_KEY = process.env.SECRET_KEY || 'your-secret-key';
 const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { username, email, password } = req.body;
+    const { username, email, password } = req.body; // Include username
     try {
+        console.log('Incoming registration request:', { username, email, password });
+        if (!email || !password) {
+            console.error('Missing email or password in request body');
+            res.status(400).json({ message: 'Email and password are required.' });
+            return;
+        }
+        const existingUser = yield userModel_1.default.findOne({ email });
+        if (existingUser) {
+            console.error(`Email already in use: ${email}`);
+            res.status(400).json({ message: 'Email is already in use.' });
+            return;
+        }
         const hashedPassword = yield bcrypt_1.default.hash(password, 10);
-        const user = new userModel_1.default({ username, email, password: hashedPassword });
+        console.log('Password hashed successfully');
+        const user = new userModel_1.default({ username, email, password: hashedPassword }); // Include username
+        console.log('Saving user to database:', user);
         const savedUser = yield user.save();
-        res.status(201).json(savedUser);
+        console.log('User saved successfully:', savedUser);
+        res.status(201).json({ message: 'User registered successfully.', user: savedUser });
     }
     catch (error) {
-        res.status(500).json({ message: 'Error registering user', error });
+        console.error('Error registering user:', error);
+        res.status(500).json({ message: 'Error registering user.', error });
     }
 });
 exports.registerUser = registerUser;
@@ -43,12 +59,15 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             res.status(401).json({ message: 'Invalid credentials' });
             return;
         }
-        const token = jsonwebtoken_1.default.sign({ id: user._id, email: user.email }, SECRET_KEY, {
+        // This is the critical change - using _id instead of id
+        const token = jsonwebtoken_1.default.sign({ _id: user._id, email: user.email }, SECRET_KEY, {
             expiresIn: '1h',
         });
+        console.log('Generated token with user ID:', user._id);
         res.status(200).json({ token });
     }
     catch (error) {
+        console.error('Error logging in:', error);
         res.status(500).json({ message: 'Error logging in', error });
     }
 });
