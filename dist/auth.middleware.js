@@ -22,7 +22,7 @@ const authenticateKey = (req, res, next) => {
         console.log('Token decoded (without verification):', decoded);
         const verified = jsonwebtoken_1.default.verify(token, SECRET_KEY);
         console.log('Token verified:', verified);
-        if (!verified.id) {
+        if (!verified._id) {
             console.log('ERROR: No id property in verified token!');
             console.log('Token contains:', Object.keys(verified).join(', '));
         }

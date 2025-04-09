@@ -24,7 +24,7 @@ export const authenticateKey = (req: Request, res: Response, next: NextFunction)
     const verified = jwt.verify(token, SECRET_KEY);
     console.log('Token verified:', verified);
 
-    if (!(verified as any).id) {
+    if (!(verified as any)._id) {
       console.log('ERROR: No id property in verified token!');
       console.log('Token contains:', Object.keys(verified as object).join(', '));
     }
