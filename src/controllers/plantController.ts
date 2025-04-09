@@ -1,6 +1,6 @@
-import Plant from '../models/plantModel';
 import mongoose from 'mongoose';
 import { Request, Response } from 'express';
+import Plant, { IPlant } from '../models/plantModel';
 
 export const getAllPlants = async (req: Request, res: Response) => {
   try {
@@ -57,17 +57,37 @@ export const createPlant = async (req: Request, res: Response) => {
 export const updatePlant = async (req: Request, res: Response) => {
   const { id } = req.params;
   const userEmail = (req as any).user.email;
-  const updateData = req.body;
+
+  const { name, species, plantingDate, wateringFrequency, lightRequirement, harvestDate, imageUrl } = req.body;
+
+  const updateData: Partial<IPlant> = {
+    name,
+    species,
+    plantingDate: plantingDate ? new Date(plantingDate) : undefined,
+    wateringFrequency: Number(wateringFrequency),
+    lightRequirement,
+    harvestDate: harvestDate ? new Date(harvestDate) : undefined,
+    imageUrl
+  };
 
   try {
     if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: 'Invalid Plant ID format.' });
-    const updatedPlant = await Plant.findOneAndUpdate({ _id: id, userEmail }, updateData, { new: true });
+
+    const updatedPlant = await Plant.findOneAndUpdate(
+      { _id: id, userEmail },
+      updateData,
+      { new: true, runValidators: true }
+    );
+
     if (!updatedPlant) return res.status(404).json({ message: 'Plant not found.' });
+
     res.status(200).json(updatedPlant);
   } catch (error) {
+    console.error('Error updating plant:', error);
     res.status(500).json({ message: 'Error updating plant.' });
   }
 };
+
 
 export const deletePlant = async (req: Request, res: Response) => {
   const { id } = req.params;

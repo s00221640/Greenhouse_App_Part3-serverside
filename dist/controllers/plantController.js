@@ -13,8 +13,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteAllPlants = exports.deletePlant = exports.updatePlant = exports.createPlant = exports.getPlantById = exports.getAllPlants = void 0;
-const plantModel_1 = __importDefault(require("../models/plantModel"));
 const mongoose_1 = __importDefault(require("mongoose"));
+const plantModel_1 = __importDefault(require("../models/plantModel"));
 const getAllPlants = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user = req.user;
@@ -74,16 +74,26 @@ exports.createPlant = createPlant;
 const updatePlant = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const userEmail = req.user.email;
-    const updateData = req.body;
+    const { name, species, plantingDate, wateringFrequency, lightRequirement, harvestDate, imageUrl } = req.body;
+    const updateData = {
+        name,
+        species,
+        plantingDate: plantingDate ? new Date(plantingDate) : undefined,
+        wateringFrequency: Number(wateringFrequency),
+        lightRequirement,
+        harvestDate: harvestDate ? new Date(harvestDate) : undefined,
+        imageUrl
+    };
     try {
         if (!mongoose_1.default.isValidObjectId(id))
             return res.status(400).json({ message: 'Invalid Plant ID format.' });
-        const updatedPlant = yield plantModel_1.default.findOneAndUpdate({ _id: id, userEmail }, updateData, { new: true });
+        const updatedPlant = yield plantModel_1.default.findOneAndUpdate({ _id: id, userEmail }, updateData, { new: true, runValidators: true });
         if (!updatedPlant)
             return res.status(404).json({ message: 'Plant not found.' });
         res.status(200).json(updatedPlant);
     }
     catch (error) {
+        console.error('Error updating plant:', error);
         res.status(500).json({ message: 'Error updating plant.' });
     }
 });
