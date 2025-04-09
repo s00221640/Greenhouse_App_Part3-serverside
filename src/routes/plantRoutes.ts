@@ -8,30 +8,25 @@ import {
   deleteAllPlants
 } from '../controllers/plantController';
 import { authenticateKey } from '../auth.middleware';
-import Plant from '../models/plantModel'; // Added import for Plant model
+import Plant from '../models/plantModel'; 
+import { upload } from '../middleware/multerMiddleware';
 
 const router: Router = express.Router();
 
 router.use(authenticateKey);
 
 // Debug/special routes first
-// Emergency reset route - REMOVE IN PRODUCTION
 router.delete('/reset', async (req: Request, res: Response) => {
   try {
-    // Delete all plants
     const result = await Plant.deleteMany({});
     console.log(`Deleted all ${result.deletedCount} plants`);
-    
-    res.status(200).json({ 
-      message: `Deleted all ${result.deletedCount} plants` 
-    });
+    res.status(200).json({ message: `Deleted all ${result.deletedCount} plants` });
   } catch (error) {
     console.error('Error resetting plants:', error);
     res.status(500).json({ message: 'Error resetting plants', error });
   }
 });
 
-// Debug route to delete all plants - REMOVE IN PRODUCTION
 router.delete('/all/debug', async (req: Request, res: Response) => {
   try {
     await deleteAllPlants(req, res);
@@ -41,24 +36,21 @@ router.delete('/all/debug', async (req: Request, res: Response) => {
   }
 });
 
-// Fix plants route for adding userId to plants without one
 router.post('/fix-plants', async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.id;
     console.log('Fixing plants for user ID:', userId);
-    
-    // Find plants without userId
+
     const plantsWithoutUserId = await Plant.find({ userId: { $exists: false } });
     console.log(`Found ${plantsWithoutUserId.length} plants without userId`);
-    
-    // Fix each plant by adding the current user's ID
+
     const updatePromises = plantsWithoutUserId.map(plant => 
       Plant.findByIdAndUpdate(plant._id, { userId: userId }, { new: true })
     );
-    
+
     const updatedPlants = await Promise.all(updatePromises);
     console.log(`Updated ${updatedPlants.length} plants with userId: ${userId}`);
-    
+
     res.status(200).json({ 
       message: `Fixed ${updatedPlants.length} plants`, 
       plants: updatedPlants
@@ -70,7 +62,6 @@ router.post('/fix-plants', async (req: Request, res: Response) => {
 });
 
 // Standard CRUD routes
-// Fetch all plants
 router.get('/', async (req: Request, res: Response) => {
   try {
     await getAllPlants(req, res);
@@ -80,17 +71,32 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
-//Create a new plant
-router.post('/', async (req: Request, res: Response) => {
-  try {
-    await createPlant(req, res);
-  } catch (error) {
-    console.error('Error in POST /:', error);
-    res.status(500).json({ message: 'Error creating plant', error });
+router.post(
+  '/',
+  (req: Request, res: Response, next) => {
+    const contentType = req.headers['content-type'] || '';
+    if (contentType.includes('multipart/form-data')) {
+      upload(req, res, (err) => {
+        if (err) {
+          console.error('Multer error:', err);
+          return res.status(400).json({ message: 'File upload error', error: err });
+        }
+        next();
+      });
+    } else {
+      next();
+    }
+  },
+  async (req: Request, res: Response) => {
+    try {
+      await createPlant(req, res);
+    } catch (error) {
+      console.error('Error in POST /:', error);
+      res.status(500).json({ message: 'Error creating plant', error });
+    }
   }
-});
+);
 
-//Fetch a plant by ID
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     await getPlantById(req, res);
@@ -100,7 +106,6 @@ router.get('/:id', async (req: Request, res: Response) => {
   }
 });
 
-// Update a plant by ID
 router.put('/:id', async (req: Request, res: Response) => {
   try {
     await updatePlant(req, res);
@@ -110,7 +115,6 @@ router.put('/:id', async (req: Request, res: Response) => {
   }
 });
 
-// Delete a plant by ID
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
     await deletePlant(req, res);

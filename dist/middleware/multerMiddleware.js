@@ -32,18 +32,7 @@ const storage = new multer_storage_cloudinary_1.CloudinaryStorage({
         });
     }),
 });
-// Wrap multer.fields as a proper middleware for Express
-const multerMiddleware = (0, multer_1.default)({
+exports.upload = (0, multer_1.default)({
     storage,
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB max
-}).fields([{ name: 'image', maxCount: 1 }]);
-const upload = (req, res, next) => {
-    multerMiddleware(req, res, (err) => {
-        if (err) {
-            console.error('❌ Multer error:', err);
-            return res.status(400).json({ message: 'File upload error', error: err });
-        }
-        next();
-    });
-};
-exports.upload = upload;
+    limits: { fileSize: 10 * 1024 * 1024 },
+}).single('image'); // 🔄 Switched to .single() instead of .fields()
