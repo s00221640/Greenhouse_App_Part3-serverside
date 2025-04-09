@@ -58,20 +58,27 @@ export const updatePlant = async (req: Request, res: Response) => {
   const { id } = req.params;
   const userEmail = (req as any).user.email;
 
-  const { name, species, plantingDate, wateringFrequency, lightRequirement, harvestDate, imageUrl } = req.body;
-
-  const updateData: Partial<IPlant> = {
-    name,
-    species,
-    plantingDate: plantingDate ? new Date(plantingDate) : undefined,
-    wateringFrequency: Number(wateringFrequency),
-    lightRequirement,
-    harvestDate: harvestDate ? new Date(harvestDate) : undefined,
-    imageUrl
-  };
-
   try {
     if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: 'Invalid Plant ID format.' });
+
+    // Check if the plant exists and belongs to the user
+    const existingPlant = await Plant.findOne({ _id: id, userEmail });
+    if (!existingPlant) return res.status(404).json({ message: 'Plant not found.' });
+
+    // Build update data, checking for file upload
+    const updateData: Partial<IPlant> = {
+      name: req.body.name,
+      species: req.body.species,
+      plantingDate: req.body.plantingDate ? new Date(req.body.plantingDate) : undefined,
+      wateringFrequency: Number(req.body.wateringFrequency),
+      lightRequirement: req.body.lightRequirement,
+      harvestDate: req.body.harvestDate ? new Date(req.body.harvestDate) : undefined,
+    };
+
+    // If there's a new image file, add it to updateData
+    if ((req as any).file && (req as any).file.path) {
+      updateData.imageUrl = (req as any).file.path;
+    }
 
     const updatedPlant = await Plant.findOneAndUpdate(
       { _id: id, userEmail },
@@ -79,7 +86,7 @@ export const updatePlant = async (req: Request, res: Response) => {
       { new: true, runValidators: true }
     );
 
-    if (!updatedPlant) return res.status(404).json({ message: 'Plant not found.' });
+    if (!updatedPlant) return res.status(404).json({ message: 'Plant not found after update attempt.' });
 
     res.status(200).json(updatedPlant);
   } catch (error) {
@@ -87,8 +94,6 @@ export const updatePlant = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Error updating plant.' });
   }
 };
-
-
 export const deletePlant = async (req: Request, res: Response) => {
   const { id } = req.params;
   const userEmail = (req as any).user.email;

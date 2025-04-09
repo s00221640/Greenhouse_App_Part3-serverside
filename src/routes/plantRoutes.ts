@@ -106,14 +106,32 @@ router.get('/:id', async (req: Request, res: Response) => {
   }
 });
 
-router.put('/:id', async (req: Request, res: Response) => {
-  try {
-    await updatePlant(req, res);
-  } catch (error) {
-    console.error('Error in PUT /:id:', error);
-    res.status(500).json({ message: 'Error updating plant', error });
+// Updated PUT route with multer middleware for file uploads
+router.put(
+  '/:id',
+  (req: Request, res: Response, next) => {
+    const contentType = req.headers['content-type'] || '';
+    if (contentType.includes('multipart/form-data')) {
+      upload(req, res, (err) => {
+        if (err) {
+          console.error('Multer error during update:', err);
+          return res.status(400).json({ message: 'File upload error', error: err });
+        }
+        next();
+      });
+    } else {
+      next();
+    }
+  },
+  async (req: Request, res: Response) => {
+    try {
+      await updatePlant(req, res);
+    } catch (error) {
+      console.error('Error in PUT /:id:', error);
+      res.status(500).json({ message: 'Error updating plant', error });
+    }
   }
-});
+);
 
 router.delete('/:id', async (req: Request, res: Response) => {
   try {

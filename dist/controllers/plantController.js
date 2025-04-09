@@ -74,22 +74,29 @@ exports.createPlant = createPlant;
 const updatePlant = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const userEmail = req.user.email;
-    const { name, species, plantingDate, wateringFrequency, lightRequirement, harvestDate, imageUrl } = req.body;
-    const updateData = {
-        name,
-        species,
-        plantingDate: plantingDate ? new Date(plantingDate) : undefined,
-        wateringFrequency: Number(wateringFrequency),
-        lightRequirement,
-        harvestDate: harvestDate ? new Date(harvestDate) : undefined,
-        imageUrl
-    };
     try {
         if (!mongoose_1.default.isValidObjectId(id))
             return res.status(400).json({ message: 'Invalid Plant ID format.' });
+        // Check if the plant exists and belongs to the user
+        const existingPlant = yield plantModel_1.default.findOne({ _id: id, userEmail });
+        if (!existingPlant)
+            return res.status(404).json({ message: 'Plant not found.' });
+        // Build update data, checking for file upload
+        const updateData = {
+            name: req.body.name,
+            species: req.body.species,
+            plantingDate: req.body.plantingDate ? new Date(req.body.plantingDate) : undefined,
+            wateringFrequency: Number(req.body.wateringFrequency),
+            lightRequirement: req.body.lightRequirement,
+            harvestDate: req.body.harvestDate ? new Date(req.body.harvestDate) : undefined,
+        };
+        // If there's a new image file, add it to updateData
+        if (req.file && req.file.path) {
+            updateData.imageUrl = req.file.path;
+        }
         const updatedPlant = yield plantModel_1.default.findOneAndUpdate({ _id: id, userEmail }, updateData, { new: true, runValidators: true });
         if (!updatedPlant)
-            return res.status(404).json({ message: 'Plant not found.' });
+            return res.status(404).json({ message: 'Plant not found after update attempt.' });
         res.status(200).json(updatedPlant);
     }
     catch (error) {

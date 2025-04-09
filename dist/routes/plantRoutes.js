@@ -101,7 +101,22 @@ router.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         res.status(500).json({ message: 'Error fetching plant by ID', error });
     }
 }));
-router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// Updated PUT route with multer middleware for file uploads
+router.put('/:id', (req, res, next) => {
+    const contentType = req.headers['content-type'] || '';
+    if (contentType.includes('multipart/form-data')) {
+        (0, multerMiddleware_1.upload)(req, res, (err) => {
+            if (err) {
+                console.error('Multer error during update:', err);
+                return res.status(400).json({ message: 'File upload error', error: err });
+            }
+            next();
+        });
+    }
+    else {
+        next();
+    }
+}, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield (0, plantController_1.updatePlant)(req, res);
     }
