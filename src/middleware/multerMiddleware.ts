@@ -22,4 +22,4 @@ const storage = new CloudinaryStorage({
 export const upload = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 },
-}).single('image'); // 🔄 Switched to .single() instead of .fields()
+}).single('image'); 

@@ -6,7 +6,7 @@ import User, { IUser } from '../models/userModel';
 const SECRET_KEY = process.env.SECRET_KEY || 'your-secret-key';
 
 export const registerUser = async (req: Request, res: Response): Promise<void> => {
-  const { username, email, password } = req.body; // Include username
+  const { username, email, password } = req.body; //username 
 
   try {
     console.log('Incoming registration request:', { username, email, password });
@@ -56,7 +56,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // This is the critical change - using _id instead of id
+    //using _id instead of id
     const token = jwt.sign({ _id: user._id, email: user.email }, SECRET_KEY, {
       expiresIn: '1h',
     });
