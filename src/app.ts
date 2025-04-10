@@ -4,27 +4,25 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import plantRoutes from './routes/plantRoutes';
 import userRoutes from './routes/userRoutes';
+import adminRoutes from './routes/adminRoutes'; 
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Enable CORS
 app.use(cors());
 
-// ✅ Log requests before routes to capture early errors
 app.use((req, res, next) => {
   console.log(`Incoming Request: ${req.method} ${req.url}`);
   console.log('Headers:', req.headers);
   next();
 });
 
-// ✅ Conditional middleware to avoid breaking Multer multipart handling
 app.use((req, res, next) => {
   const contentType = req.headers['content-type'] || '';
   if (contentType.includes('multipart/form-data')) {
-    return next(); // Let Multer handle it
+    return next(); 
   }
 
   express.json()(req, res, (err) => {
@@ -33,11 +31,10 @@ app.use((req, res, next) => {
   });
 });
 
-// ✅ Mount routes
 app.use('/users', userRoutes);
 app.use('/plants', plantRoutes);
+app.use('/admin', adminRoutes);
 
-// Simple test routes
 app.get('/test-cors', (req, res) => {
   res.json({ message: 'CORS is working!' });
 });
@@ -46,7 +43,6 @@ app.get('/', (req, res) => {
   res.send('Welcome to the Greenhouse App!');
 });
 
-// MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI as string)
   .then(() => console.log('Connected to MongoDB'))

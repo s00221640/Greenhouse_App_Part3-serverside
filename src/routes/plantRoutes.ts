@@ -15,7 +15,19 @@ const router: Router = express.Router();
 
 router.use(authenticateKey);
 
-// Debug/special routes first
+// Admin code verification route
+router.post('/admin-code-check', (req: Request, res: Response) => {
+  const providedCode = req.body.code;
+  const adminCode = process.env.ADMIN_CODE;
+
+  if (providedCode === adminCode) {
+    res.status(200).json({ success: true });
+  } else {
+    res.status(403).json({ success: false, message: 'Invalid admin code' });
+  }
+});
+
+// Debug/special routes
 router.delete('/reset', async (req: Request, res: Response) => {
   try {
     const result = await Plant.deleteMany({});
@@ -61,7 +73,7 @@ router.post('/fix-plants', async (req: Request, res: Response) => {
   }
 });
 
-// Standard CRUD routes
+// CRUD routes
 router.get('/', async (req: Request, res: Response) => {
   try {
     await getAllPlants(req, res);
@@ -106,7 +118,6 @@ router.get('/:id', async (req: Request, res: Response) => {
   }
 });
 
-// Updated PUT route with multer middleware for file uploads
 router.put(
   '/:id',
   (req: Request, res: Response, next) => {

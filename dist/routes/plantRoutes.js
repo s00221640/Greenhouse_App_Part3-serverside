@@ -19,7 +19,18 @@ const plantModel_1 = __importDefault(require("../models/plantModel"));
 const multerMiddleware_1 = require("../middleware/multerMiddleware");
 const router = express_1.default.Router();
 router.use(auth_middleware_1.authenticateKey);
-// Debug/special routes first
+// Admin code verification route
+router.post('/admin-code-check', (req, res) => {
+    const providedCode = req.body.code;
+    const adminCode = process.env.ADMIN_CODE;
+    if (providedCode === adminCode) {
+        res.status(200).json({ success: true });
+    }
+    else {
+        res.status(403).json({ success: false, message: 'Invalid admin code' });
+    }
+});
+// Debug/special routes
 router.delete('/reset', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const result = yield plantModel_1.default.deleteMany({});
@@ -59,7 +70,7 @@ router.post('/fix-plants', (req, res) => __awaiter(void 0, void 0, void 0, funct
         res.status(500).json({ message: 'Error fixing plants', error });
     }
 }));
-// Standard CRUD routes
+// CRUD routes
 router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield (0, plantController_1.getAllPlants)(req, res);
@@ -101,7 +112,6 @@ router.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         res.status(500).json({ message: 'Error fetching plant by ID', error });
     }
 }));
-// Updated PUT route with multer middleware for file uploads
 router.put('/:id', (req, res, next) => {
     const contentType = req.headers['content-type'] || '';
     if (contentType.includes('multipart/form-data')) {
