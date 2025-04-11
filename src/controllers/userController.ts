@@ -2,11 +2,16 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User, { IUser } from '../models/userModel';
+import dotenv from 'dotenv';
 
-const SECRET_KEY = process.env.SECRET_KEY || 'your-secret-key';
+// Ensure environment variables are loaded
+dotenv.config();
+
+// Use the exact same SECRET_KEY as defined in your .env file
+const SECRET_KEY = process.env.SECRET_KEY || 'super-secret-123';
 
 export const registerUser = async (req: Request, res: Response): Promise<void> => {
-  const { username, email, password } = req.body; //username 
+  const { username, email, password } = req.body; 
 
   try {
     console.log('Incoming registration request:', { username, email, password });
@@ -27,7 +32,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
     const hashedPassword = await bcrypt.hash(password, 10);
     console.log('Password hashed successfully');
 
-    const user = new User({ username, email, password: hashedPassword }); // Include username
+    const user = new User({ username, email, password: hashedPassword }); 
     console.log('Saving user to database:', user);
 
     const savedUser = await user.save();
@@ -39,7 +44,6 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
     res.status(500).json({ message: 'Error registering user.', error });
   }
 };
-
 
 export const loginUser = async (req: Request, res: Response): Promise<void> => {
   const { email, password } = req.body;
@@ -56,7 +60,10 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    //using _id instead of id
+    // Log the SECRET_KEY being used (remove in production)
+    console.log('Using SECRET_KEY for token generation:', SECRET_KEY);
+
+    // Create token with the exact same SECRET_KEY that's used in auth.middleware.ts
     const token = jwt.sign({ _id: user._id, email: user.email }, SECRET_KEY, {
       expiresIn: '1h',
     });

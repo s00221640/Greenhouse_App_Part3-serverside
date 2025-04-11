@@ -1,32 +1,42 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 
-const SECRET_KEY = process.env.SECRET_KEY || 'your-secret-key';
+// Ensure environment variables are loaded
+dotenv.config();
+
+// Use the exact same SECRET_KEY as defined in your .env file
+const SECRET_KEY = process.env.SECRET_KEY || 'super-secret-123';
 
 export const authenticateKey = (req: Request, res: Response, next: NextFunction): void => {
   console.log('\n--- Auth Middleware ---');
   console.log('Headers:', JSON.stringify(req.headers));
 
-  const token = req.headers.authorization?.split(' ')[1];
-
-  if (!token) {
+  const authHeader = req.headers.authorization;
+  
+  if (!authHeader || authHeader === 'Bearer null') {
     console.log('No token provided in request');
     res.status(401).json({ message: 'No token provided. Unauthorized access.' });
     return;
   }
 
+  const token = authHeader.split(' ')[1];
+
   try {
     console.log('Token received:', token);
+    console.log('Using SECRET_KEY for verification:', SECRET_KEY);  // Debug line - remove in production
 
     const decoded: any = jwt.decode(token);
     console.log('Token decoded (without verification):', decoded);
 
     const verified = jwt.verify(token, SECRET_KEY);
-    console.log('Token verified:', verified);
+    console.log('Token verified successfully:', verified);
 
     if (!(verified as any)._id) {
       console.log('ERROR: No id property in verified token!');
       console.log('Token contains:', Object.keys(verified as object).join(', '));
+      res.status(401).json({ message: 'Invalid token format. Missing user ID.' });
+      return;
     }
 
     (req as any).user = verified;

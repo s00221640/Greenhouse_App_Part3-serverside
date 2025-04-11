@@ -16,9 +16,13 @@ exports.validateToken = exports.loginUser = exports.registerUser = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const userModel_1 = __importDefault(require("../models/userModel"));
-const SECRET_KEY = process.env.SECRET_KEY || 'your-secret-key';
+const dotenv_1 = __importDefault(require("dotenv"));
+// Ensure environment variables are loaded
+dotenv_1.default.config();
+// Use the exact same SECRET_KEY as defined in your .env file
+const SECRET_KEY = process.env.SECRET_KEY || 'super-secret-123';
 const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { username, email, password } = req.body; // Include username
+    const { username, email, password } = req.body;
     try {
         console.log('Incoming registration request:', { username, email, password });
         if (!email || !password) {
@@ -34,7 +38,7 @@ const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         }
         const hashedPassword = yield bcrypt_1.default.hash(password, 10);
         console.log('Password hashed successfully');
-        const user = new userModel_1.default({ username, email, password: hashedPassword }); // Include username
+        const user = new userModel_1.default({ username, email, password: hashedPassword });
         console.log('Saving user to database:', user);
         const savedUser = yield user.save();
         console.log('User saved successfully:', savedUser);
@@ -59,7 +63,9 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             res.status(401).json({ message: 'Invalid credentials' });
             return;
         }
-        // This is the critical change - using _id instead of id
+        // Log the SECRET_KEY being used (remove in production)
+        console.log('Using SECRET_KEY for token generation:', SECRET_KEY);
+        // Create token with the exact same SECRET_KEY that's used in auth.middleware.ts
         const token = jsonwebtoken_1.default.sign({ _id: user._id, email: user.email }, SECRET_KEY, {
             expiresIn: '1h',
         });
